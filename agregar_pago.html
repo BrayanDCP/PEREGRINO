@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Peregrino | Agregar Deuda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/auth.css">
+
+    <style>
+        body { background-color: #f0f4f8; }
+        .brand-title { color: #D4AF37; font-weight: bold; }
+        .btn-gold { background-color: #D4AF37; color: #000; font-weight: bold; }
+        .btn-gold:hover { background-color: #C0A030; color: #000; }
+        .auth-box { background-color: #fff; }
+        .error-message { font-size: 0.875rem; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg shadow-sm mb-4" style="background-color:#ffffff;">
+    <div class="container">
+        <a class="navbar-brand" href="dashboard.html">Peregrino</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarDashboard">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarDashboard">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="#">Perfil</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Cantidad Total</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Estadísticas</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Notificaciones</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Contenido principal -->
+<div class="container my-5">
+    <div class="auth-wrapper mx-auto">
+        <div class="auth-box p-4 rounded shadow">
+
+            <h2 class="brand-title text-center mb-3">Agregar Deuda</h2>
+            <p class="text-center text-secondary mb-4">Completa los datos para hacer seguimiento de tu deuda</p>
+
+            <form id="formAgregarPago">
+
+                <div class="mb-3">
+                    <label for="banco" class="form-label">Banco / Institución</label>
+                    <input type="text" class="form-control" id="banco" placeholder="Ej. Banco X" required>
+                    <small class="error-message text-danger"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="concepto" class="form-label">Concepto / Deuda</label>
+                    <input type="text" class="form-control" id="concepto" placeholder="Ej. Préstamo personal" required>
+                    <small class="error-message text-danger"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="monto_total" class="form-label">Monto total</label>
+                    <input type="number" class="form-control" id="monto_total" placeholder="Ej. 5000" min="0.01" step="0.01" required>
+                    <small class="error-message text-danger"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cuotas" class="form-label">Número de cuotas (1-60)</label>
+                    <input type="number" class="form-control" id="cuotas" placeholder="Ej. 10" min="1" max="60" required>
+                    <small class="error-message text-danger"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="monto_cuota" class="form-label">Monto por cuota</label>
+                    <input type="number" class="form-control" id="monto_cuota" placeholder="Ej. 500" min="0.01" step="0.01" required>
+                    <small class="text-muted">Monto que se pagará por cada cuota según banco</small>
+                    <small class="error-message text-danger"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="monto_faltante" class="form-label">Monto faltante</label>
+                    <input type="number" class="form-control" id="monto_faltante" readonly>
+                    <small class="text-muted">Monto restante por pagar</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="fecha_inicio" class="form-label">Fecha de inicio</label>
+                    <input type="date" class="form-control" id="fecha_inicio" required>
+                    <small class="error-message text-danger"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="fecha_fin" class="form-label">Fecha de fin</label>
+                    <input type="date" class="form-control" id="fecha_fin" readonly>
+                    <small class="text-muted">Se calculará automáticamente según fecha de inicio y número de cuotas</small>
+                    <small class="error-message text-danger"></small>
+                </div>
+
+                <button type="submit" class="btn btn-gold w-100 mt-3">Agregar Deuda</button>
+            </form>
+
+            <p class="mt-3 text-center">
+                <a href="dashboard.html">Cancelar y volver al Dashboard</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/dashboard.js"></script>
+<script>
+    // ===========================
+    // Manejo del formulario de agregar deuda
+    // ===========================
+    const form = document.getElementById("formAgregarPago");
+
+    // Actualiza monto_faltante y fecha_fin automáticamente
+    const montoTotalInput = document.getElementById("monto_total");
+    const cuotasInput = document.getElementById("cuotas");
+    const montoCuotaInput = document.getElementById("monto_cuota");
+    const montoFaltanteInput = document.getElementById("monto_faltante");
+    const fechaInicioInput = document.getElementById("fecha_inicio");
+    const fechaFinInput = document.getElementById("fecha_fin");
+
+    function actualizarMontoFaltante(){
+        const montoTotal = parseFloat(montoTotalInput.value) || 0;
+        montoFaltanteInput.value = montoTotal.toFixed(2);
+    }
+
+    function actualizarFechaFin(){
+        const fechaInicio = fechaInicioInput.value;
+        const cuotas = parseInt(cuotasInput.value) || 1;
+        if(fechaInicio){
+            const fecha = new Date(fechaInicio);
+            fecha.setMonth(fecha.getMonth() + cuotas);
+            fechaFinInput.value = fecha.toISOString().split("T")[0];
+        }
+    }
+
+    montoTotalInput.addEventListener("input", actualizarMontoFaltante);
+    cuotasInput.addEventListener("input", ()=>{
+        actualizarMontoFaltante();
+        actualizarFechaFin();
+    });
+    fechaInicioInput.addEventListener("change", actualizarFechaFin);
+
+    // ===========================
+    // Submit del formulario
+    // ===========================
+    form.addEventListener("submit", (e)=>{
+        e.preventDefault();
+
+        const banco = montoTotalInput.parentElement.parentElement.querySelector("#banco").value.trim();
+        const concepto = form.querySelector("#concepto").value.trim();
+        const monto_total = parseFloat(montoTotalInput.value);
+        const cuotas = parseInt(cuotasInput.value);
+        const monto_cuota = parseFloat(montoCuotaInput.value);
+        const monto_faltante = parseFloat(montoFaltanteInput.value);
+        const fecha_inicio = fechaInicioInput.value;
+        const fecha_fin = fechaFinInput.value;
+
+        // Validaciones básicas
+        if(!banco || !concepto || !monto_total || !cuotas || !monto_cuota || !fecha_inicio || !fecha_fin){
+            alert("❌ Todos los campos son obligatorios y deben ser válidos.");
+            return;
+        }
+
+        const nuevoPago = {
+            banco,
+            concepto,
+            monto_total,
+            cuotas,
+            monto_cuota,
+            monto_faltante,
+            fecha_inicio,
+            fecha_fin,
+            estado: "Pendiente"
+        };
+
+        // Guardar en localStorage
+        pagos.push(nuevoPago);
+        localStorage.setItem("pagos", JSON.stringify(pagos));
+
+        alert("✅ Deuda agregada correctamente!");
+        window.location.href = "dashboard.html";
+    });
+
+    // ===========================
+    // Inicializar navbar
+    // ===========================
+    if(typeof conectarNavbar === "function") conectarNavbar();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
